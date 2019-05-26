@@ -9,7 +9,7 @@
     }
 
     .index h1 {
-        height: 150px;
+        height: 330px;
     }
 
     .index h1 img {
@@ -34,11 +34,12 @@
         <Row type="flex" justify="center" align="middle">
             <Col span="24">
                 <h1>
-                    <img src="https://raw.githubusercontent.com/iview/iview/master/assets/logo.png">
+                    <!--<img src="https://raw.githubusercontent.com/iview/iview/master/assets/logo.png">-->
+                    <img src="https://hbimg.huabanimg.com/77b8aa29b2b3ee8230396d22688a5380a93dc0e67657-NPmDU1_fw658">
                 </h1>
                 <h2>
                     <p>springboot websocket connection!</p>
-                    <Input v-model="sendValue" placeholder="Enter Text..." style="width: 300px"></Input>
+                    <Input v-model="sendValue" placeholder="Enter Text... Lets Talk" style="width: 300px"></Input>
                     <Button type="ghost" @click="websocket">发送</Button>
                     <br>
                 </h2>
@@ -57,7 +58,9 @@
         },
         methods: {
             websocket () {
-                 const agentData = this.sendValue;
+                const agentData = this.sendValue;
+                var timestamp = Date.parse(new Date());
+                alert(timestamp);
                 //若是ws开启状态
                 if (this.websock.readyState === this.websock.OPEN) {
                     this.websocketsend(agentData)

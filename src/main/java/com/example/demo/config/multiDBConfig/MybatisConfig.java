@@ -1,11 +1,13 @@
 package com.example.demo.config.multiDBConfig;
 
 import com.alibaba.druid.pool.DruidDataSourceFactory;
+import com.example.demo.config.DruidDBConfig;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -21,8 +23,10 @@ import java.util.Properties;
  * springboot集成mybatis的基本入口 1）创建数据源(如果采用的是默认的tomcat-jdbc数据源，则不需要)
  * 2）创建SqlSessionFactory 3）配置事务管理器，除非需要使用事务，否则不用配置
  */
-@Configuration // 该注解类似于spring配置文件
-@MapperScan(basePackages = "com.xxx")
+
+
+@Configuration
+@MapperScan(basePackages = "com.example.demo.dao")
 public class MybatisConfig {
 
     @Value("${jdbc.driverClassName}")
@@ -59,6 +63,7 @@ public class MybatisConfig {
      * 创建数据源(数据源的名称：方法名可以取为XXXDataSource(),XXX为数据库名称,该名称也就是数据源的名称)
      */
     @Bean
+    @ConditionalOnMissingClass("com.example.demo.config.DruidDBConfig")
     public DataSource myTestDbDataSource() throws Exception {
         Properties props = new Properties();
         props.put("driverClassName", jdbcDriverClassName);
@@ -69,6 +74,7 @@ public class MybatisConfig {
     }
 
     @Bean
+    @ConditionalOnMissingClass("com.example.demo.config.DruidDBConfig")
     public DataSource myTestDb2DataSource() throws Exception {
         Properties props = new Properties();
         props.put("driverClassName", jdbcDriverClassName2);
@@ -84,6 +90,7 @@ public class MybatisConfig {
      */
     @Bean
     @Primary
+    @ConditionalOnMissingClass("com.example.demo.config.DruidDBConfig")
     public DynamicDataSource dataSource(@Qualifier("myTestDbDataSource") DataSource myTestDbDataSource,
                                         @Qualifier("myTestDb2DataSource") DataSource myTestDb2DataSource) {
         Map<Object, Object> targetDataSources = new HashMap<>();
@@ -100,7 +107,8 @@ public class MybatisConfig {
     /**
      * 根据数据源创建SqlSessionFactory
      */
-//    @Bean
+    @Bean
+    @ConditionalOnMissingClass("com.example.demo.config.DruidDBConfig")
     public SqlSessionFactory sqlSessionFactory(DynamicDataSource ds) throws Exception {
         SqlSessionFactoryBean fb = new SqlSessionFactoryBean();
         fb.setDataSource(ds);// 指定数据源(这个必须有，否则报错)
@@ -115,7 +123,8 @@ public class MybatisConfig {
     /**
      * 配置事务管理器
      */
-//    @Bean
+    @Bean
+    @ConditionalOnMissingClass("com.example.demo.config.DruidDBConfig")
     public DataSourceTransactionManager transactionManager(DynamicDataSource dataSource) throws Exception {
         return new DataSourceTransactionManager(dataSource);
     }

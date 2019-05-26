@@ -6,6 +6,7 @@ import com.alibaba.druid.support.http.WebStatFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -73,7 +74,8 @@ public class DruidDBConfig {
     private String connectionProperties;
 
 //    @Bean(initMethod = "init", destroyMethod = "close")   //声明其为Bean实例
-//    @Primary  //在同样的DataSource中，首先使用被标注的DataSource
+    @Bean
+    @Primary  //在同样的DataSource中，首先使用被标注的DataSource
     public DataSource dataSource() {
         DruidDataSource datasource = new DruidDataSource();
 
@@ -105,6 +107,10 @@ public class DruidDBConfig {
         return datasource;
     }
 
+    /**
+     * http://127.0.0.1:8080/druid/index.html
+     * 查看数据库监控
+     */
     @Bean
     public ServletRegistrationBean druidServlet() {
         ServletRegistrationBean reg = new ServletRegistrationBean();

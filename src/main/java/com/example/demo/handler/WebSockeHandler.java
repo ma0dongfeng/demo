@@ -5,12 +5,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.example.demo.command.CommandHandler;
 import com.example.demo.command.CommandHolder;
 import com.example.demo.config.NettyConfig;
+import com.example.demo.connection.ChannelHolder;
+import com.example.demo.connection.ConnectionHolder;
+import com.example.demo.connection.Session;
+import com.example.demo.connection.impl.DefaultSession;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -42,6 +43,15 @@ public class WebSockeHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void channelInactive(ChannelHandlerContext context)throws Exception{
         NettyConfig.group.remove(context.channel());
+        if(ChannelHolder.getInstance().getClientId(context.channel())!=null){
+            ConnectionHolder.getInstance().removeConn(
+                ChannelHolder.getInstance().getClientId(context.channel()));
+        }
+
+        ChannelHolder.getInstance().removeChannel(context.channel());
+
+        logger.warn("channelMap size():{}",ChannelHolder.getInstance().getchannelMap().size());
+
         logger.warn("客户端与服务端连接断开");
     }
     //服务端接收客户端发送过来的数据结束之后调用
@@ -53,6 +63,11 @@ public class WebSockeHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void exceptionCaught(ChannelHandlerContext context, Throwable throwable)throws Exception{
         throwable.printStackTrace();
+        ConnectionHolder.getInstance().removeConn(
+                ChannelHolder.getInstance().getClientId(context.channel()));
+        ChannelHolder.getInstance().removeChannel(context.channel());
+
+        logger.warn("exceptionCaught channelMap size:{}",ChannelHolder.getInstance().getchannelMap().size());
         context.close();
     }
     //服务端处理客户端websocke请求的核心方法
@@ -90,14 +105,15 @@ public class WebSockeHandler extends SimpleChannelInboundHandler<Object> {
         JSONObject recJson = vaildJson(reqParam);
         CommandHandler commandHandler = CommandHolder.getHandler(recJson.getString("cmd"));
         try {
-            commandHandler.handle(recJson);
+            commandHandler.handle(context, recJson);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        TextWebSocketFrame textWebSocketFrame = new TextWebSocketFrame(context.channel().id() + ":" + "你个笨比");
         //服务端向每个连接上来的客户端发送消息
-        NettyConfig.group.writeAndFlush(textWebSocketFrame);
+//        NettyConfig.group.writeAndFlush(textWebSocketFrame);
+
+
     }
 
     public JSONObject vaildJson(String recMsg) throws ParseException{

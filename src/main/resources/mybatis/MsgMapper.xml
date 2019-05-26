@@ -4,16 +4,16 @@
 <mapper namespace="com.example.demo.dao.MsgDao">
 
     <select id="get" resultType="com.example.demo.domain.MsgDO">
-		select `msg`,`msg_time`,`msg_type`,`msg_id`,`talk_id`,`cid` from msg where talk_id = #{talkId}
+		select `msg`,`msg_time`,`msg_type`,`msg_id`,`talk_id`,`cid` from message where talk_id = #{talkId}
 	</select>
 
     <insert id="save" parameterType="com.example.demo.domain.MsgDO" useGeneratedKeys="true" keyProperty="id">
 
-		insert into sys_log
+		insert into message
 		(
 			`msg`,
 			`msg_time`,
-			`msg_type`,
+			`type`,
 			`msg_id`,
 			`talk_id`,
 			`cid`
