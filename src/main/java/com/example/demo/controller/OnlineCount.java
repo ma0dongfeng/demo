@@ -18,5 +18,4 @@ public class OnlineCount {
     public int count(){
         return ChannelHolder.getInstance().getchannelMap().size();
     }
-
 }
